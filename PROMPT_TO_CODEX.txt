@@ -1,0 +1,7 @@
+Build the Real or Random cryptographic oracle application in this repository.
+
+Read AGENTS.md first, then read every mandatory document it references under docs/ before writing code. Treat those files as the product contract.
+
+Implement the required v1 end-to-end, not just scaffolding. Preserve the blind Real-or-Random experiment semantics, keep hidden world and secret keys server-side, implement AES-256-GCM and HMAC-SHA-256 PRF modes, persistence, transcript/history, statistics, export, reproducible mode, tests, and documentation.
+
+Work incrementally and run the required lint, typecheck, unit/integration, E2E, and build commands before finishing. Fix failures rather than merely reporting them. In the final response, summarize what was implemented, architecture choices, commands/tests run, and any optional items intentionally deferred.
