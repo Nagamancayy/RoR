@@ -13,3 +13,8 @@ test-results/
 coverage/
 .DS_Store
 .pnpm-store/
+
+# Local Python environments and generated caches are not application sources.
+.venv/
+__pycache__/
+*.pyc

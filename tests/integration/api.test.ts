@@ -553,14 +553,14 @@ describe('HTTP validation and public schema boundaries', () => {
     expect(response.headers.get('x-content-type-options')).toBe('nosniff');
     expect(response.headers.get('access-control-allow-origin')).toBeNull();
     const metadata = await response.json();
-    expect(metadata).toHaveLength(2);
+    expect(metadata).toHaveLength(3);
     // Config metadata intentionally names its public parameter using `key`.
     // This is distinct from a cryptographic key or experiment secret state.
     expect(
       metadata.map((adapter: { configFields: { key: string }[] }) =>
         adapter.configFields.map((field) => field.key),
       ),
-    ).toEqual([['aad'], ['outputBytes']]);
+    ).toEqual([['aad'], ['outputBytes'], []]);
     expect(JSON.stringify(metadata)).not.toMatch(
       /keyB64|secretState|sealedWorld|sealedState|sealedSeed/,
     );

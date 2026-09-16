@@ -101,6 +101,26 @@ try {
     assert.equal(result.status, 'COMPLETED');
     assert.ok(['REAL', 'RANDOM'].includes(result.world));
     console.log('PASS: production create → query → guess → reveal with SQLite persistence.');
+    const check = await post('/api/algorithms/modifvigne-v3-4/check', {});
+    assert.equal(check.cases.length, 8);
+    assert.ok(check.cases.every((item) => item.bytesMatch && item.tagVerified));
+    const custom = await post('/api/experiments', {
+      kind: 'ENCRYPTION_ROR',
+      algorithmId: 'modifvigne-v3-4',
+      queryLimit: 1,
+    });
+    const customQuery = await post(`/api/experiments/${custom.id}/query`, {
+      encoding: 'utf8',
+      data: 'original research',
+    });
+    assert.deepEqual(
+      customQuery.queries[0].response.fields.map((field) => field.name),
+      ['tag', 'salt', 'ciphertext'],
+    );
+    await post(`/api/experiments/${custom.id}/guess`, { guess: 'REAL' });
+    console.log(
+      'PASS: unchanged Python encryption/decryption and ModifVigne oracle in production.',
+    );
     const batch = await post('/api/runs', {
       requestId: crypto.randomUUID(),
       config: {

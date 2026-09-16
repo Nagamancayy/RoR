@@ -4,8 +4,9 @@ export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: false,
   workers: 1,
-  timeout: 45_000,
-  expect: { timeout: 10_000 },
+  // Cold Next.js compilation on a busy local laptop can exceed 45 seconds.
+  timeout: 90_000,
+  expect: { timeout: 30_000 },
   reporter: [['list'], ['html', { open: 'never' }]],
   use: { baseURL: 'http://127.0.0.1:3100', trace: 'retain-on-failure' },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],

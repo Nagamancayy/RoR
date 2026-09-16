@@ -5,7 +5,16 @@ const config: NextConfig = {
   serverExternalPackages: ['better-sqlite3'],
   // Local research data and master keys are runtime files, never deployment artifacts.
   outputFileTracingExcludes: {
-    '*': ['./data/**/*', './.env*', './test-results/**/*', './playwright-report/**/*'],
+    '*': [
+      './data/**/*',
+      './.env*',
+      './test-results/**/*',
+      './playwright-report/**/*',
+      './modifvigne/**/*',
+    ],
+  },
+  outputFileTracingIncludes: {
+    '/*': ['./vendor/modifvigne-v3-4/**/*', './scripts/modifvigne-bridge.py'],
   },
   poweredByHeader: false,
   devIndicators: false,

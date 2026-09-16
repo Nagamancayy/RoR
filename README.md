@@ -178,3 +178,9 @@ pnpm test:production
 Browser tests run a separate loopback server and a fresh SQLite database under ignored `data/`. They cover complete experiments, repeated PRF inputs, malformed encodings, query budgets, final confirmation, history, public visibility, concurrency, and mobile layout. The production smoke test uses a temporary database and generated test key; it also verifies that missing/invalid keys stop the server before it can be used.
 
 Optional batch automation, comparative workspaces, additional randomness tests, and themes are outside this first release.
+
+## Original ModifVigne v3.4 research algorithm
+
+Select **ModifVigne v3.4 (original Python)** in the experiment form. The app runs unchanged copies of your original encryption/decryption sources, verified by SHA-256. Requires Python 3 (`ROR_PYTHON` can select its executable). Inputs are valid UTF-8, up to 1 KiB; seeded replay is unavailable for this adapter to preserve its original randomness.
+
+Use **Check encryption / decryption** before starting, or run `pnpm test:modifvigne`. The check reports byte recovery, tag verification and original text display separately, including the preserved UTF-8/Latin-1 difference. See [exact source identity, oracle/key distribution and limitations](docs/MODIFVIGNE_V3_4.md).

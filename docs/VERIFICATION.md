@@ -1,3 +1,23 @@
+# ModifVigne v3.4 integration verification
+
+Verified on 2026-09-16. The two original files and their vendored snapshots were compared byte-for-byte and matched the pinned SHA-256 hashes. Neither original source file was changed.
+
+| Check | Result |
+| --- | --- |
+| Format / lint / strict typecheck | Passed |
+| Unit + integration | 150 tests across 10 files passed (`vitest run --testTimeout=60000`) |
+| Playwright E2E | 13 scenarios passed, including ModifVigne manual checks and autonomous batches |
+| Production build | Passed without warnings; pinned bridge/source assets included explicitly |
+| Production smoke | Original Python correctness check, ModifVigne query/guess/reveal, AES, baseline worker and master-key checks passed |
+| Original encrypt/decrypt fixtures | 8/8 byte recovery and tag checks passed; Unicode display differs as in the original decryptor |
+| Live OpenAI evaluation | Not performed; browser tests use the existing injected provider, never a production fake model |
+
+The first verification attempt hit the busy laptop's old test timeouts and exposed a missing-runtime startup failure. The integration now records `ADAPTER_RUNTIME_UNAVAILABLE` without stopping the worker, and the browser harness allows longer cold compilation. Production algorithm code and model limits were not changed. A temporary typecheck raced Next's generated development route files; type generation and final typecheck/build then passed sequentially.
+
+See the [saved correctness report](modifvigne-v3-4-correctness.json) and [exact experiment scope](MODIFVIGNE_V3_4.md). These are sampled correctness checks and empirical research infrastructure, not a cryptographic security proof.
+
+---
+
 # v2 autonomous adversary verification
 
 Verified on 2026-09-16 with Node.js 25.2.1, pnpm 11.19.0, Next.js 16.3.5 and Chromium on macOS arm64.

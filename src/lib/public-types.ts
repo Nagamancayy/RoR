@@ -103,6 +103,7 @@ export interface ConfigField {
   help: string;
 }
 export interface AlgorithmMetadata {
+  supportsReproducible?: boolean;
   id: string;
   displayName: string;
   kind: ExperimentKind;

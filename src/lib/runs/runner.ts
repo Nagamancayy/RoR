@@ -79,7 +79,7 @@ export async function executeRound(
           : error instanceof DomainError
             ? new AdversaryError(
                 error.code,
-                error.code === 'SECRET_STATE_ERROR',
+                error.code === 'SECRET_STATE_ERROR' || error.code === 'ADAPTER_RUNTIME_UNAVAILABLE',
                 error.status < 500,
               )
             : new AdversaryError('INTERNAL_ERROR', true);

@@ -1,4 +1,5 @@
 'use client';
+import ModifvigneCheckPanel from '@/components/modifvigne-check';
 import { useRef, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -122,6 +123,7 @@ export default function NewExperiment() {
                 </select>
                 <p className="field-hint">{algorithm?.description}</p>
               </div>
+              {algorithm?.id === 'modifvigne-v3-4' && <ModifvigneCheckPanel />}
               {algorithm?.configFields.map((f) => (
                 <div className="field" key={`${algorithm.id}-${f.key}`}>
                   <label htmlFor={`oracle-${f.key}`}>{f.label}</label>

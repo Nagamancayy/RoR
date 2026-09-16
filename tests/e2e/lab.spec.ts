@@ -159,3 +159,21 @@ test('desktop and 360px mobile layout and accessibility', async ({ page }, testI
     .analyze();
   expect(consoleAudit.violations).toEqual([]);
 });
+
+test('original ModifVigne check and manual oracle work with preserved source semantics', async ({
+  page,
+}) => {
+  await page.goto('/experiments/manual?algorithm=modifvigne-v3-4');
+  await expect(page.getByLabel('Algorithm', { exact: true })).toHaveValue('modifvigne-v3-4');
+  await page.getByRole('button', { name: 'Check encryption / decryption' }).click();
+  await expect(page.getByText('Checked 8 independent fixtures.', { exact: false })).toBeVisible();
+  await expect(page.getByRole('status')).toContainText('displayed text DIFFERS');
+  await page.getByRole('button', { name: 'Start Blind Experiment' }).click();
+  await expect(page.getByLabel('Oracle input')).toBeVisible();
+  await query(page, 'Penelitian v3.4', 1);
+  await expect(page.getByTestId('response-field-salt')).toBeVisible();
+  await expect(page.getByTestId('response-field-tag')).toBeVisible();
+  await page.getByRole('button', { name: 'Guess REAL', exact: true }).click();
+  await page.getByRole('button', { name: 'Confirm guess', exact: true }).click();
+  await expect(page).toHaveURL(/\/result$/);
+});

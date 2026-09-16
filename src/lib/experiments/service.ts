@@ -59,6 +59,11 @@ export class ExperimentService {
         'ADAPTER_KIND_MISMATCH',
         'The algorithm does not support this experiment kind.',
       );
+    if (request.reproducible && adapter.metadata.supportsReproducible === false)
+      throw new DomainError(
+        'VALIDATION_ERROR',
+        'This algorithm preserves its original OS randomness and does not support seeded replay.',
+      );
     let config: JsonObject;
     try {
       config = adapter.validateConfig(request.algorithmConfig);

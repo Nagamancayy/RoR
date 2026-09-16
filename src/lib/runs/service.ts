@@ -52,7 +52,7 @@ type RoundRow = {
   error_code: string | null;
 };
 const transitions: Record<RoundStatus, RoundStatus[]> = {
-  CREATED: ['WORLD_INITIALIZED', 'CANCELLED'],
+  CREATED: ['WORLD_INITIALIZED', 'FAILED', 'CANCELLED'],
   WORLD_INITIALIZED: ['WAITING_FOR_MODEL', 'FAILED', 'CANCELLED'],
   WAITING_FOR_MODEL: ['ORACLE_QUERY', 'FINAL_GUESS_RECEIVED', 'FAILED', 'CANCELLED'],
   ORACLE_QUERY: ['ORACLE_RESPONSE', 'FAILED', 'CANCELLED'],
@@ -327,13 +327,23 @@ export class RunService {
       }
       this.sql.prepare("UPDATE experiment_runs SET status='RUNNING' WHERE id=?").run(run.id);
       const c = JSON.parse(run.config_json) as RunConfig;
-      const e = this.challenger.create({
-        name: `${c.name} · Round ${pending.round_number}`,
-        kind: c.kind,
-        algorithmId: c.algorithmId,
-        algorithmConfig: c.algorithmConfig,
-        queryLimit: c.queryBudget,
-      });
+      let e;
+      try {
+        e = this.challenger.create({
+          name: `${c.name} · Round ${pending.round_number}`,
+          kind: c.kind,
+          algorithmId: c.algorithmId,
+          algorithmConfig: c.algorithmConfig,
+          queryLimit: c.queryBudget,
+        });
+      } catch (error) {
+        if (!(error instanceof DomainError) || error.code !== 'ADAPTER_RUNTIME_UNAVAILABLE')
+          throw error;
+        // Roll back the failed Challenger creation, close this batch without reveal,
+        // and keep the worker alive for unrelated algorithms in the queue.
+        this.fail(owner, pending.id, error.code, true);
+        return null;
+      }
       this.sql
         .prepare('UPDATE run_rounds SET experiment_id=?,started_at=? WHERE id=?')
         .run(e.id, this.timestamp(), pending.id);

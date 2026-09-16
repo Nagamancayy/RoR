@@ -8,7 +8,7 @@ test.afterEach(async ({ request }) => {
     await request.delete(`/api/runs/${run.id}`);
   }
 });
-for (const oracle of ['aes-256-gcm', 'hmac-sha256-prf'])
+for (const oracle of ['aes-256-gcm', 'hmac-sha256-prf', 'modifvigne-v3-4'])
   test(`autonomous ${oracle}: query, decide, reveal, persist and export`, async ({
     page,
     request,

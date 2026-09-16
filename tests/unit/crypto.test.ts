@@ -232,7 +232,7 @@ describe('adapter equivalence and PRF semantics', () => {
     ).not.toEqual(outputs[0]);
   });
   it('metadata does not expose server functions or secret state', () => {
-    expect(listAlgorithms()).toHaveLength(2);
+    expect(listAlgorithms()).toHaveLength(3);
     expect(JSON.stringify(listAlgorithms())).not.toMatch(/keyB64|secretState|sealedWorld/);
     expect(() => getAdapter('unknown')).toThrow(
       expect.objectContaining({ code: 'ADAPTER_NOT_FOUND' }),

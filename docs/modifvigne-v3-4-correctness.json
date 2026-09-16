@@ -1,0 +1,72 @@
+{
+  "checkedAt": "2026-09-16T12:04:15.093Z",
+  "sourceVersion": "original-v3.4",
+  "encryptionSha256": "bde33391750173f4c1b5e6825302976f62b7e09c49b2e594fa46411e43e42470",
+  "decryptionSha256": "731bb01192d83e631a704df610fa56620dedb0d8ea62471703b55fbf2ea6b56b",
+  "cases": [
+    {
+      "label": "Empty text",
+      "inputBytes": 0,
+      "outputBytes": 288,
+      "bytesMatch": true,
+      "textMatches": true,
+      "tagVerified": true
+    },
+    {
+      "label": "ASCII",
+      "inputBytes": 25,
+      "outputBytes": 288,
+      "bytesMatch": true,
+      "textMatches": true,
+      "tagVerified": true
+    },
+    {
+      "label": "NUL and line breaks",
+      "inputBytes": 15,
+      "outputBytes": 288,
+      "bytesMatch": true,
+      "textMatches": true,
+      "tagVerified": true
+    },
+    {
+      "label": "Unicode",
+      "inputBytes": 25,
+      "outputBytes": 288,
+      "bytesMatch": true,
+      "textMatches": false,
+      "tagVerified": true
+    },
+    {
+      "label": "127 bytes",
+      "inputBytes": 127,
+      "outputBytes": 288,
+      "bytesMatch": true,
+      "textMatches": true,
+      "tagVerified": true
+    },
+    {
+      "label": "128 bytes",
+      "inputBytes": 128,
+      "outputBytes": 416,
+      "bytesMatch": true,
+      "textMatches": true,
+      "tagVerified": true
+    },
+    {
+      "label": "129 bytes",
+      "inputBytes": 129,
+      "outputBytes": 416,
+      "bytesMatch": true,
+      "textMatches": true,
+      "tagVerified": true
+    },
+    {
+      "label": "1024 bytes",
+      "inputBytes": 1024,
+      "outputBytes": 1312,
+      "bytesMatch": true,
+      "textMatches": true,
+      "tagVerified": true
+    }
+  ]
+}

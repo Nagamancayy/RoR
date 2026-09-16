@@ -79,3 +79,7 @@ Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:e2e` and `pnpm build`
 ## Autonomous adversaries
 
 The batch runner invokes this same adapter registry; do not add AES-specific branches to the adversary, statistics, persistence or console. Metadata is part of the model-visible specification: describe REAL/RANDOM behavior, response fields, input restrictions and deterministic-repeat semantics accurately. Never include secret state or internal debugging information. AI probes currently have a 1 KiB input and 128 KiB public-context limit; context overflow fails explicitly. Test your adapter through both manual and autonomous paths, including repeated decoded bytes, world-independent failures and response shape equivalence.
+
+### Preserving an external research implementation
+
+The [ModifVigne v3.4 adapter](MODIFVIGNE_V3_4.md) is an explicit exception to the normal Node RNG/seeded-replay convention: the user requires unchanged Python code and OS randomness. Its fixed bridge and checksum-pinned source copies preserve those semantics. Metadata sets `supportsReproducible: false`; the service rejects seeded sessions. It restricts input to valid UTF-8 and 1 KiB in both worlds, and documents its exact key distribution. Do not use this adapter to silently enable arbitrary script execution or claim deterministic replay of external randomness.

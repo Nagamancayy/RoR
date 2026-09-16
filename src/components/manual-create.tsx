@@ -1,4 +1,5 @@
 'use client';
+import ModifvigneCheckPanel from './modifvigne-check';
 
 import { FormEvent, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -60,6 +61,7 @@ export default function CreateExperiment() {
   const selected = algorithms.data?.find((a) => a.id === algorithmId);
   function chooseAlgorithm(algorithm: AlgorithmMetadata | undefined) {
     if (!algorithm) return;
+    if (algorithm.supportsReproducible === false) setReproducible(false);
     setAlgorithmId(algorithm.id);
     setKind(algorithm.kind);
     setConfig(Object.fromEntries(algorithm.configFields.map((f) => [f.key, f.default])));
@@ -169,6 +171,7 @@ export default function CreateExperiment() {
                 </select>
                 {selected && <p className="algorithm-description">{selected.description}</p>}
               </div>
+              {selected?.id === 'modifvigne-v3-4' && <ModifvigneCheckPanel />}
               {selected?.configFields.map((field) => (
                 <div key={`${selected.id}-${field.key}`} className="field">
                   <label htmlFor={`config-${field.key}`}>{field.label}</label>
@@ -237,6 +240,7 @@ export default function CreateExperiment() {
                 <label className="check-row">
                   <input
                     type="checkbox"
+                    disabled={selected?.supportsReproducible === false}
                     checked={reproducible}
                     onChange={(event) => {
                       setReproducible(event.target.checked);
@@ -251,6 +255,11 @@ export default function CreateExperiment() {
                     </small>
                   </span>
                 </label>
+                {selected?.supportsReproducible === false && (
+                  <p className="field-hint">
+                    This original Python algorithm uses OS randomness. Seeded replay is unavailable.
+                  </p>
+                )}
                 {reproducible && (
                   <div className="nested-options">
                     <div className="field">

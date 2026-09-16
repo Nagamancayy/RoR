@@ -22,7 +22,8 @@
     "db:migrate": "tsx scripts/db-migrate.ts",
     "dev:web": "next dev --hostname 127.0.0.1",
     "start:web": "next start --hostname 127.0.0.1",
-    "worker": "tsx scripts/worker.ts"
+    "worker": "tsx scripts/worker.ts",
+    "test:modifvigne": "tsx scripts/check-modifvigne.ts"
   },
   "dependencies": {
     "better-sqlite3": "13.0.3",

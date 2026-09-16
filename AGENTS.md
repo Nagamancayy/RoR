@@ -23,6 +23,10 @@ Do not begin by generating code after reading only this file.
 
 The primary workflow now uses an autonomous AI adversary and isolated multi-round batches. Read `docs/AUTONOMOUS_ADVERSARY.md` for the additive v2 contract. Existing cryptographic rules apply per round. Preserve manual mode as a secondary educational workflow. Never expose Challenger secrets to model prompts or tools.
 
+## Original ModifVigne research integration
+
+Read `docs/MODIFVIGNE_V3_4.md` before changing this adapter. Never edit or reformat the user’s `modifvigne/` sources or the checksum-pinned copies in `vendor/modifvigne-v3-4/`. Keep integration code separate; preserve the original Python flow, randomness and known text-decoding behavior.
+
 ## Product mission
 
 Build a polished local-first research/education application where:

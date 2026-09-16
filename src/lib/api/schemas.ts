@@ -137,6 +137,7 @@ export const algorithmsSchema = z.array(
     kind,
     description: z.string(),
     securityNote: z.string(),
+    supportsReproducible: z.boolean().optional(),
     responseFields: z.array(z.strictObject({ name: z.string(), description: z.string() })),
     configFields: z.array(
       z.strictObject({
