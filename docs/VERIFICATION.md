@@ -1,3 +1,28 @@
+# v2 autonomous adversary verification
+
+Verified on 2026-09-16 with Node.js 25.2.1, pnpm 11.19.0, Next.js 16.3.5 and Chromium on macOS arm64.
+
+| Check | Result |
+| --- | --- |
+| Formatter / lint / strict typecheck | Passed |
+| Unit + integration tests | 137 tests across 9 files passed |
+| Playwright E2E | 11 scenarios passed, including original manual flows |
+| Production build | Passed with all manual and autonomous routes |
+| Production smoke | Missing/invalid master key fails startup; manual lifecycle and autonomous worker baseline batch pass |
+| Live OpenAI call | Not run: OPENAI_API_KEY and OPENAI_ADVERSARY_MODEL are not configured on this machine |
+
+New coverage includes explicit model context/tool allowlists; private reasoning exclusion; strict action parsing; final-only budget behavior; retries/timeouts; round isolation; independent baseline simulation; completed-only statistics; API origin/validation/idempotency; duplicate callback and multi-process worker/action races; lease expiry; cancellation during inference; incomplete usage; v1 migration with pre-existing sealed records; cascade deletion; refresh/history/export and zero-query CSV rows. E2E uses an injected deterministic transport in `tests/support` through the real OpenAI adapter and real Challenger. The production entrypoint has no fixture mode.
+
+The browser suite covers autonomous AES and PRF batches, baseline, stop, missing configuration, manual regressions and 360px accessibility/layout. Screenshots are inspected in addition to automated Axe checks. These are not exhaustive accessibility or constant-time certifications.
+
+## Deliberate boundaries
+
+No cross-round learning, external attacker scripts, parallel model inference, serverless deployment or monetary pricing integration. A local server/worker must remain running. Unknown provider usage after timeouts/cancellation is explicitly partial; remote cancellation cannot guarantee that a provider avoided processing or charging a request. Live provider/account compatibility must be verified after configuring credentials.
+
+The custom oracle template remains deliberately unregistered with extension TODOs. All production built-in flows are implemented. v1 evidence below is retained as historical context.
+
+---
+
 # v1 verification
 
 Verified on 2026-09-15 with Node.js 25.2.1, pnpm 11.19.0, Next.js 16.3.5, and Chromium 153 on macOS arm64.
@@ -30,4 +55,4 @@ The accessibility checks cover the tested screens and are supplemented by source
 
 ## Optional work deferred
 
-Batch/automated distinguishers, algorithm comparison workspaces, import bundles, additional randomness tests, and theme switching. The custom adapter template deliberately contains TODOs and is not registered as an executable oracle.
+Historical v1 deferrals: batch/automated distinguishers and comparison have now shipped in v2. Import bundles, additional randomness tests, and theme switching remain optional. The custom adapter template deliberately contains TODOs and is not registered as an executable oracle.

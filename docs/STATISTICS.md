@@ -71,3 +71,7 @@ For `N = 0`, success rate, advantage, Wilson interval, and p-value are `null`; a
 ## Validation
 
 `tests/unit/statistics.test.ts` covers constant and uniform byte distributions, known entropy values, byte identity across encodings, printable boundaries, empty data, response field boundaries, Wilson reference values, exact small binomial probabilities, large-sample numerical behavior, completed-only grouping, query bucket boundaries, cumulative ordering, and the advantage convention.
+
+## Autonomous batches (v2)
+
+The same success probability, absolute empirical advantage, Wilson interval and exact binomial formulas apply per completed adversary round. Requested, failed and cancelled rounds are displayed separately; failure-dependent missingness can bias the completed sample. World counts include only committed reveals. Independent fair challenge bits are not forced to be exactly balanced. Confidence is the adversary's self-reported probability for its selected guess, not the Wilson interval. Duration and query means use completed rounds; usage includes all recorded attempts and explicitly marks unknown usage as partial. AI and baseline aggregates are separated, with additional model/oracle/kind grouping. Matched-batch comparison requires identical oracle configuration and query budget, but does not reuse secret worlds or claim a paired statistical test.

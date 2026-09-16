@@ -9,7 +9,7 @@ test.afterEach(async ({ request }) => {
 });
 
 async function createThroughUI(page: Page, name: string, kind: 'aes' | 'prf' = 'aes', limit = 3) {
-  await page.goto('/experiments/new');
+  await page.goto('/experiments/manual');
   await page.getByLabel('Algorithm', { exact: true }).waitFor();
   if (kind === 'prf') await page.getByRole('radio', { name: /^PRF RoR/ }).check();
   await page.getByLabel(/Experiment name/).fill(name);
@@ -51,7 +51,7 @@ test('AES experiment, persisted refresh, irreversible confirmation, result and h
   await expect(page).toHaveURL(new RegExp(`/experiments/${id}/result$`));
   await expect(page.getByText('Hidden world', { exact: true })).toBeVisible();
   expect((await (await request.get(`/api/experiments/${id}`)).json()).status).toBe('COMPLETED');
-  await page.goto('/history');
+  await page.goto('/history/manual');
   await expect(
     page.getByRole('link', { name: 'Open AES browser trial', exact: true }),
   ).toBeVisible();
@@ -139,7 +139,7 @@ test('desktop and 360px mobile layout and accessibility', async ({ page }, testI
   );
   await page.getByRole('button', { name: 'Open navigation' }).click();
   await page.getByRole('link', { name: 'New experiment', exact: true }).click();
-  await expect(page.getByLabel('Algorithm', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Oracle / Scheme', { exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
   );

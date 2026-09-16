@@ -1,6 +1,6 @@
 # Real or Random Lab
 
-A local cryptography workspace for blind Real-or-Random distinguishing experiments. Query an oracle, inspect its public byte responses, lock a final guess, then study the reveal and empirical results.
+A local-first cryptography laboratory where an autonomous AI adversary chooses oracle queries and independently guesses REAL or RANDOM. Configure and observe isolated rounds, compare a random-guessing baseline, and inspect empirical results. Manual educational mode remains available.
 
 ![Real or Random Lab overview](docs/screenshots/overview.png)
 
@@ -14,7 +14,7 @@ pnpm setup
 pnpm dev
 ```
 
-Open [localhost:3000](http://127.0.0.1:3000). The development server binds to loopback. After dependencies are installed, ordinary use works offline, with no cloud account, analytics, external fonts, or external database.
+Open [localhost:3000](http://127.0.0.1:3000). The development server binds to loopback. The command starts both Next.js and the SQLite-backed adversary worker. Manual and random-baseline modes work offline after installation. AI mode sends public specifications and oracle observations to OpenAI; keys and hidden worlds remain local.
 
 The setup command applies the committed SQLite migration and prepares a persistent development master key. Migrations also run automatically when the database opens; explicitly run them with `pnpm db:migrate`.
 
@@ -26,6 +26,8 @@ Copy `.env.example` to `.env.local` to customize configuration. Next.js loads th
 | --- | --- |
 | `DATABASE_URL` | Defaults to `file:./data/ror.db`. SQLite file on this machine. |
 | `ROR_MASTER_KEY` | Exactly 32 bytes encoded as 64 hex characters or canonical Base64. Required in production. |
+| `OPENAI_API_KEY` | Server-only OpenAI API credential; optional for manual/baseline use. |
+| `OPENAI_ADVERSARY_MODEL` | Default Responses API model ID; can be selected per batch. |
 | `ROR_DEV_KEY_FILE` | Optional development key path; defaults to `data/.master-key`. |
 
 Without an environment master key, development creates `data/.master-key` with owner-only permissions. Keep this file together with your database backups. Losing or changing the key makes existing secret records unreadable. The database, keys, local environment files, and test artifacts are excluded from Git. Never commit them.
@@ -43,7 +45,34 @@ pnpm start
 
 Production startup fails if the master key is absent or invalid. This is a single-user local tool without authentication. Keep it on a trusted machine and loopback network; it is not designed for direct public hosting.
 
-## What you can do
+## Run an AI experiment
+
+1. Set `OPENAI_API_KEY` and `OPENAI_ADVERSARY_MODEL` in your private `.env.local`. Use a model with Responses API function calling available to your account.
+2. Start or restart with `pnpm dev` (or `pnpm start` after building).
+3. Open **New experiment**, choose oracle, **AI Model**, rounds and query budget, review the maximum call count, then start.
+4. Watch QUERY → OBSERVATION → DECISION → REVEAL. The AI chooses its own probes and final answer. Stop Experiment cancels unfinished rounds without reveal.
+5. Inspect round history, exports, usage, confidence intervals, and matched-batch comparisons under Statistics.
+
+Default: 10 rounds × 20-query budget, maximum 25 model calls per round including retries. API usage may be charged. No monetary estimate is fabricated. Missing API configuration is shown explicitly and never replaced with a fake AI. Choose **Random Guess Baseline** to test locally without an API key.
+
+`pnpm dev --port 3001` selects an alternative web port. `pnpm worker`, `pnpm dev:web`, and `pnpm start:web` are available for separate process management. All processes must share `DATABASE_URL` and the same master key. Batches continue when the browser is closed; stop the batch before shutting down if you do not want pending rounds to resume on restart.
+
+The [autonomous adversary design](docs/AUTONOMOUS_ADVERSARY.md) documents states, lease recovery, limits, privacy, APIs, migration and test boundaries. Migration v2 is additive; it preserves manual history and encrypted records. Back up the database with its master key before upgrading.
+
+## Autonomous workflow
+
+- **Create:** configurable oracle/model, isolated rounds, bounded queries, steps and timeouts.
+- **Console:** persisted event timeline, byte responses, public diagnostics, irreversible model decisions and stop control.
+- **Results:** per-round confidence, revealed world, correctness, query counts, duration and token usage.
+- **History/export:** batch and round details; JSON/CSV retain zero-query rounds and exclude unrevealed secrets.
+- **Comparison:** AI and random-baseline batches with matching oracle configuration and query budgets.
+- **Failure handling:** individual round failure continues; systemic credential/model/storage problems stop the batch.
+
+AI performance is empirical evidence against one adversary configuration, **not a cryptographic security proof**. Failed and cancelled rounds are reported separately and excluded from accuracy; incomplete outcomes may bias the completed sample.
+
+## Manual / Educational Mode
+
+The secondary menu preserves the original workflow, including:
 
 - **Dashboard:** recent sessions, completed count, observed accuracy, empirical advantage, average queries.
 - **Create:** experiment kind, compatible algorithm, public parameters, 1–10,000-query budget, display preferences, optional reproducible mode.
@@ -55,7 +84,7 @@ Production startup fails if the master key is absent or invalid. This is a singl
 
 ## The games
 
-The server samples **one world per experiment** and keeps it fixed. Both worlds expose the same response fields, encodings, and byte lengths. Keys never appear in browser responses or exports, including after completion. Aborting closes the experiment without revealing its world or counting it toward accuracy.
+The server samples **one world per round (or manual experiment)** and keeps it fixed. Both worlds expose the same response fields, encodings, and byte lengths. Keys never appear in browser responses or exports, including after completion. Aborting closes the experiment without revealing its world or counting it toward accuracy.
 
 ### AES-256-GCM · Encryption RoR
 

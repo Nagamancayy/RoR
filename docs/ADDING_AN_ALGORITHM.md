@@ -75,3 +75,7 @@ Use `tests/unit/crypto.test.ts` and `tests/integration/service.test.ts` as examp
 `ExperimentService` accepts internal `worldSampler`, `rngFactory`, `masterKey` and `now` dependency injection. These options are available only in server/test code. Never add a `forceWorld` request parameter.
 
 Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:e2e` and `pnpm build`. Describe the exact oracle model and its limitations in the adapter's documentation. Randomness diagnostics and empirical advantage do not replace formal cryptanalysis.
+
+## Autonomous adversaries
+
+The batch runner invokes this same adapter registry; do not add AES-specific branches to the adversary, statistics, persistence or console. Metadata is part of the model-visible specification: describe REAL/RANDOM behavior, response fields, input restrictions and deterministic-repeat semantics accurately. Never include secret state or internal debugging information. AI probes currently have a 1 KiB input and 128 KiB public-context limit; context overflow fails explicitly. Test your adapter through both manual and autonomous paths, including repeated decoded bytes, world-independent failures and response shape equivalence.

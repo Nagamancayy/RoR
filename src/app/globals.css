@@ -2947,3 +2947,99 @@ small {
     transition: none !important;
   }
 }
+
+/* Autonomous experiment surfaces reuse the lab's existing tokens and panels. */
+.run-list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 22px 26px;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+}
+.run-list-row:last-child {
+  border-bottom: 0;
+}
+.run-list-row:hover {
+  background: rgba(193, 184, 237, 0.035);
+}
+.run-list-row > div {
+  min-width: 0;
+}
+.run-list-row strong,
+.run-list-row p {
+  overflow-wrap: anywhere;
+}
+.run-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 20px;
+  font-size: 12px;
+}
+.adversary-timeline {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  max-height: 520px;
+  overflow-y: auto;
+}
+.adversary-timeline li {
+  margin-left: 5px;
+  border-left: 2px solid #484452;
+  padding: 12px 0 18px 20px;
+}
+.adversary-timeline li p {
+  margin: 6px 0 0;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.adversary-timeline .event-decision,
+.adversary-timeline .event-reveal {
+  border-left-color: #c1b8ed;
+}
+.adversary-timeline .event-error {
+  border-left-color: #d6ab7c;
+}
+.status-failed,
+.status-completed_with_errors {
+  color: #edc199;
+}
+.status-cancelled {
+  color: #c7c3ce;
+}
+.status-running,
+.status-waiting_for_model {
+  color: #c1b8ed;
+}
+.form-section > h2 {
+  margin-bottom: 16px;
+}
+.form-section + .notice,
+.notice + .panel,
+.panel + .metrics-grid {
+  margin-top: 24px;
+}
+.summary-row > span:last-child {
+  overflow-wrap: anywhere;
+  min-width: 0;
+  text-align: right;
+}
+@media (max-width: 600px) {
+  .run-list-row {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+    gap: 10px;
+  }
+  .run-status {
+    line-height: 1.8;
+  }
+}
+@media (max-width: 600px) {
+  .autonomous-console .console-side {
+    order: -1;
+  }
+}

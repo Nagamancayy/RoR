@@ -2,6 +2,8 @@
 
 This document contains the cryptographic semantics that must not be weakened during implementation. If another document appears ambiguous, follow this file for the game rules.
 
+For autonomous batches, “experiment” in the rules below means one isolated round. The adversary submits the final guess; the human configures and observes. See [v2 design](AUTONOMOUS_ADVERSARY.md).
+
 ## 1. Hidden challenge world
 
 Every experiment samples exactly one hidden world:

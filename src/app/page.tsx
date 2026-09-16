@@ -14,18 +14,23 @@ import {
   ShieldCheck,
   Target,
 } from 'lucide-react';
-import type {
-  AggregateStatistics,
-  AlgorithmMetadata,
-  PublicExperimentSummary,
-} from '@/lib/public-types';
+import type { AlgorithmMetadata } from '@/lib/public-types';
 import { ErrorNotice, Loading, Metric, number, percent, useResource } from '@/components/common';
-import { ExperimentList } from '@/components/experiment-list';
+import { RunList } from '@/components/run-list';
+import type { PublicRun } from '@/lib/runs/contracts';
+import { runStatistics } from '@/lib/runs/statistics';
 import { OracleDiagram } from '@/components/oracle-diagram';
 
 export default function Dashboard() {
-  const experiments = useResource<PublicExperimentSummary[]>('/api/experiments');
-  const stats = useResource<AggregateStatistics>('/api/statistics');
+  const experiments = useResource<PublicRun[]>('/api/runs');
+  const stats = {
+    data: experiments.data
+      ? runStatistics(
+          experiments.data.filter((r) => r.config.adversary === 'AI').flatMap((r) => r.rounds),
+        )
+      : null,
+    error: experiments.error,
+  };
   const algorithms = useResource<AlgorithmMetadata[]>('/api/algorithms');
   return (
     <>
@@ -33,7 +38,7 @@ export default function Dashboard() {
         <div>
           <div className="eyebrow">THE CRYPTOGRAPHY WORKSPACE</div>
           <h1>Your next discovery starts here.</h1>
-          <p>Ask the oracle. Inspect the evidence. Challenge your intuition.</p>
+          <p>Configure the Challenger. Watch the AI query, observe, and decide.</p>
         </div>
         <span className="version-pill">
           RESEARCH LAB <span>01</span>
@@ -50,8 +55,8 @@ export default function Dashboard() {
             <span>Or just random?</span>
           </h2>
           <p>
-            Run blind cryptographic experiments, explore byte-level outputs, and measure your
-            empirical distinguishing advantage.
+            Watch an autonomous AI adversary probe a hidden oracle, make its own final guess, and
+            measure its empirical distinguishing performance.
           </p>
           <div className="hero-actions">
             <Link className="button primary" href="/experiments/new">
@@ -85,9 +90,9 @@ export default function Dashboard() {
       </div>
       <div className="metrics-grid">
         <Metric
-          label="Completed experiments"
+          label="Completed AI rounds"
           value={stats.data ? number(stats.data.completed) : '—'}
-          note="Across your local workspace"
+          note="AI adversaries in your local workspace"
           icon={<FlaskConical size={16} aria-hidden="true" />}
         />
         <Metric
@@ -105,7 +110,7 @@ export default function Dashboard() {
         <Metric
           label="Average queries"
           value={stats.data ? number(stats.data.averageQueries, 1) : '—'}
-          note="Per completed experiment"
+          note="Per completed AI round"
           icon={<Beaker size={16} aria-hidden="true" />}
         />
       </div>
@@ -122,10 +127,7 @@ export default function Dashboard() {
         {!experiments.data && !experiments.error ? (
           <Loading />
         ) : (
-          <ExperimentList
-            experiments={experiments.data?.slice(0, 5) || []}
-            algorithms={algorithms.data || []}
-          />
+          <RunList runs={experiments.data?.slice(0, 5) || []} />
         )}
       </section>
       <div className="dashboard-bottom">

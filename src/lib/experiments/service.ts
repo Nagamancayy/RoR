@@ -23,6 +23,8 @@ import { aggregateStatistics } from './statistics';
 import { createSchema, guessSchema, querySchema, validate } from './validation';
 
 export interface ServiceOptions {
+  /** Trusted orchestration only; never accepted from an HTTP payload. */
+  managedAccess?: boolean;
   masterKey?: Buffer;
   /** Internal test injection only; public requests never accept a world/RNG override. */
   worldSampler?: (rng: SecureRng) => OracleWorld;
@@ -31,6 +33,7 @@ export interface ServiceOptions {
 }
 
 export class ExperimentService {
+  private readonly managedAccess: boolean;
   private readonly secretStore: SecretStore;
   private readonly worldSampler: (rng: SecureRng) => OracleWorld;
   private readonly rngFactory: (seed: Buffer | undefined, configFingerprint: string) => SecureRng;
@@ -40,6 +43,7 @@ export class ExperimentService {
     readonly database: LabDatabase,
     options: ServiceOptions = {},
   ) {
+    this.managedAccess = options.managedAccess === true;
     this.secretStore = new SecretStore(options.masterKey || loadMasterKey());
     this.worldSampler = options.worldSampler || sampleWorld;
     this.rngFactory =
@@ -143,6 +147,12 @@ export class ExperimentService {
           .from(experiments)
           .orderBy(desc(experiments.createdAt), desc(experiments.id))
           .all()
+          .filter(
+            (row) =>
+              !this.database.sqlite
+                .prepare('SELECT 1 FROM run_rounds WHERE experiment_id = ?')
+                .get(row.id),
+          )
           .map((row) => this.summary(row)),
       )
       .deferred();
@@ -152,6 +162,7 @@ export class ExperimentService {
     const request = validate(querySchema, payload);
     this.database.sqlite
       .transaction(() => {
+        this.requireMutationAccess(id);
         const row = this.row(id);
         this.requireActive(row);
         if (row.queryCount >= row.queryLimit)
@@ -204,6 +215,7 @@ export class ExperimentService {
     const { guess } = validate(guessSchema, payload);
     this.database.sqlite
       .transaction(() => {
+        this.requireMutationAccess(id);
         const row = this.row(id);
         if (row.status === 'COMPLETED')
           throw new DomainError(
@@ -233,6 +245,7 @@ export class ExperimentService {
   abort(id: string): PublicExperiment {
     this.database.sqlite
       .transaction(() => {
+        this.requireMutationAccess(id);
         const row = this.row(id);
         this.requireActive(row);
         const timestamp = this.now().toISOString();
@@ -249,6 +262,7 @@ export class ExperimentService {
   delete(id: string): void {
     this.database.sqlite
       .transaction(() => {
+        this.requireMutationAccess(id);
         this.row(id);
         this.database.db.delete(experiments).where(eq(experiments.id, id)).run();
       })
@@ -305,6 +319,17 @@ export class ExperimentService {
     const row = this.database.db.select().from(experiments).where(eq(experiments.id, id)).get();
     if (!row) throw new DomainError('EXPERIMENT_NOT_FOUND', 'This experiment does not exist.');
     return row;
+  }
+
+  private requireMutationAccess(id: string) {
+    if (
+      !this.managedAccess &&
+      this.database.sqlite.prepare('SELECT 1 FROM run_rounds WHERE experiment_id = ?').get(id)
+    )
+      throw new DomainError(
+        'EXPERIMENT_NOT_ACTIVE',
+        'This round is controlled by its adversary. Stop the batch to cancel it.',
+      );
   }
 
   private requireActive(row: ExperimentRow) {

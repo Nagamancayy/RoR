@@ -16,18 +16,21 @@ export function openDatabase(url = process.env.DATABASE_URL || 'file:./data/ror.
 }
 
 export function migrate(sqlite: Database.Database) {
-  const migration = readFileSync(path.join(process.cwd(), 'drizzle/0000_initial.sql'), 'utf8');
   sqlite
     .transaction(() => {
       sqlite.exec(
         'CREATE TABLE IF NOT EXISTS ror_migrations (version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)',
       );
-      const applied = sqlite.prepare('SELECT version FROM ror_migrations WHERE version = 1').get();
-      if (!applied) {
-        sqlite.exec(migration);
+      for (const [index, file] of ['0000_initial.sql', '0001_autonomous.sql'].entries()) {
+        const version = index + 1;
+        const applied = sqlite
+          .prepare('SELECT version FROM ror_migrations WHERE version = ?')
+          .get(version);
+        if (applied) continue;
+        sqlite.exec(readFileSync(path.join(process.cwd(), 'drizzle', file), 'utf8'));
         sqlite
           .prepare('INSERT INTO ror_migrations(version, applied_at) VALUES (?, ?)')
-          .run(1, new Date().toISOString());
+          .run(version, new Date().toISOString());
       }
     })
     .immediate();

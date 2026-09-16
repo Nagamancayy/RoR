@@ -4,6 +4,28 @@ Use this file as the final delivery checklist. Do not declare the project comple
 
 Verified for v1 on 2026-09-15. See [verification evidence and limits](VERIFICATION.md). Checked items reflect automated tests and source/visual review.
 
+## v2 autonomous adversary acceptance
+
+See [v2 design](AUTONOMOUS_ADVERSARY.md) and [verification evidence](VERIFICATION.md). Existing v1 items below still apply to manual mode and each individual oracle round.
+
+- [x] AI is the default creation workflow; manual mode and existing data remain available.
+- [x] Official OpenAI SDK/Responses API with configurable server-side credential/model.
+- [x] Missing API configuration is explicit; baseline/manual remain usable.
+- [x] Per-round fresh CSPRNG world/key/state, no cross-round model answers.
+- [x] Restricted query/final-guess tools; no Challenger object or secret data in context.
+- [x] Strict validation, finite query/step/time/context limits and bounded retries.
+- [x] Separate persistent worker, lease fencing, heartbeat and interrupted-round recovery.
+- [x] Atomic final guess/reveal, duplicate-action protection and closed oracle after stop.
+- [x] Individual failures continue; systemic failures stop the batch.
+- [x] Persisted public timeline, refresh recovery, round results and history.
+- [x] Completed-only metrics, world breakdown, Wilson interval and baseline comparison.
+- [x] Token usage includes explicit incomplete/unknown status, including cancellation.
+- [x] JSON/CSV exports include public configuration and zero-query rounds.
+- [x] Additive migration preserves existing sealed manual experiments.
+- [x] Unit/integration/multi-process/browser regression tests pass.
+- [x] Format, lint, typecheck, build and production smoke pass.
+- [ ] Live OpenAI account verification: requires real API key/model; not configured during verification.
+
 ## Foundation
 
 - [x] Next.js/React/TypeScript project runs locally.

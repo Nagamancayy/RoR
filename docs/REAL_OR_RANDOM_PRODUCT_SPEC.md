@@ -1,3 +1,5 @@
+> **v2 update:** The autonomous AI adversary workflow and additive batch architecture are specified in [AUTONOMOUS_ADVERSARY.md](AUTONOMOUS_ADVERSARY.md). The manual functionality below remains available as educational mode; cryptographic rules apply per round.
+
 # AGENT.md — Real or Random Cryptographic Oracle Lab
 
 > This file is the authoritative implementation contract for Codex and any coding agent working on this repository.

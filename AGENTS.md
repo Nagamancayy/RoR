@@ -19,6 +19,10 @@ Do not begin by generating code after reading only this file.
 
 ---
 
+## Autonomous adversary update
+
+The primary workflow now uses an autonomous AI adversary and isolated multi-round batches. Read `docs/AUTONOMOUS_ADVERSARY.md` for the additive v2 contract. Existing cryptographic rules apply per round. Preserve manual mode as a secondary educational workflow. Never expose Challenger secrets to model prompts or tools.
+
 ## Product mission
 
 Build a polished local-first research/education application where:

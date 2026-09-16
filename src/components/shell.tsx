@@ -23,6 +23,7 @@ const navigation = [
   { href: '/experiments/new', label: 'New experiment', icon: FlaskConical },
   { href: '/history', label: 'Experiment history', icon: History },
   { href: '/statistics', label: 'Statistics', icon: ChartNoAxesCombined },
+  { href: '/experiments/manual', label: 'Manual / Educational', icon: BookOpen },
 ];
 
 export function Shell({ children }: { children: React.ReactNode }) {
@@ -57,29 +58,32 @@ export function Shell({ children }: { children: React.ReactNode }) {
         Skip to content
       </a>
       {menu && (
-        <button
-          className="mobile-backdrop"
-          aria-label="Close navigation"
-          onClick={closeMenu}
-        />
+        <button className="mobile-backdrop" aria-label="Close navigation" onClick={closeMenu} />
       )}
-      <aside ref={sidebar} className={`sidebar ${menu ? 'is-open' : ''}`} onKeyDown={(event) => {
-        if (!menu) return;
-        if (event.key === 'Escape') { event.preventDefault(); closeMenu(); }
-        if (event.key === 'Tab') {
-          const links = sidebar.current?.querySelectorAll<HTMLElement>('a, button');
-          const first = links?.[0];
-          const last = links?.[links.length - 1];
-          if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-          else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
-        }
-      }}>
-        <Link
-          href="/"
-          className="brand"
-          onClick={closeMenu}
-          aria-label="Real or Random Lab home"
-        >
+      <aside
+        ref={sidebar}
+        className={`sidebar ${menu ? 'is-open' : ''}`}
+        onKeyDown={(event) => {
+          if (!menu) return;
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            closeMenu();
+          }
+          if (event.key === 'Tab') {
+            const links = sidebar.current?.querySelectorAll<HTMLElement>('a, button');
+            const first = links?.[0];
+            const last = links?.[links.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+              event.preventDefault();
+              last?.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+              event.preventDefault();
+              first?.focus();
+            }
+          }
+        }}
+      >
+        <Link href="/" className="brand" onClick={closeMenu} aria-label="Real or Random Lab home">
           <span className="brand-mark">
             <span />
             <span />
@@ -97,11 +101,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         >
           <X size={20} />
         </button>
-        <Link
-          className="button primary sidebar-start"
-          href="/experiments/new"
-          onClick={closeMenu}
-        >
+        <Link className="button primary sidebar-start" href="/experiments/new" onClick={closeMenu}>
           <Plus size={17} aria-hidden="true" /> Start experiment
         </Link>
         <div className="nav-label">WORKSPACE</div>
@@ -140,14 +140,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
             </span>
             <div>
               <strong>Your lab. Your data.</strong>
-              <p>Stored locally. Private by design.</p>
+              <p>Secrets local. AI sees public observations.</p>
             </div>
           </div>
           <div className="sidebar-version">
             <span>
               <CircleDot size={12} aria-hidden="true" /> Local workspace
             </span>
-            <span>v1.0</span>
+            <span>v2.0</span>
           </div>
         </div>
       </aside>

@@ -4,6 +4,7 @@ import {
   index,
   integer,
   primaryKey,
+  real,
   sqliteTable,
   text,
   uniqueIndex,
@@ -85,3 +86,74 @@ export const randomFunctionEntries = sqliteTable(
 
 export type ExperimentRow = typeof experiments.$inferSelect;
 export type QueryRow = typeof oracleQueries.$inferSelect;
+
+// Batch orchestration uses explicit SQL transactions over these additive tables.
+export const experimentRuns = sqliteTable('experiment_runs', {
+  id: text('id').primaryKey(),
+  requestId: text('request_id').notNull().unique(),
+  requestFingerprint: text('request_fingerprint').notNull(),
+  configJson: text('config_json').notNull(),
+  status: text('status').notNull(),
+  createdAt: text('created_at').notNull(),
+  completedAt: text('completed_at'),
+  errorCode: text('error_code'),
+});
+export const runRounds = sqliteTable(
+  'run_rounds',
+  {
+    id: text('id').primaryKey(),
+    runId: text('run_id')
+      .notNull()
+      .references(() => experimentRuns.id, { onDelete: 'cascade' }),
+    roundNumber: integer('round_number').notNull(),
+    experimentId: text('experiment_id')
+      .unique()
+      .references(() => experiments.id),
+    status: text('status').notNull(),
+    confidence: real('confidence'),
+    explanation: text('explanation'),
+    model: text('model'),
+    steps: integer('steps').notNull().default(0),
+    inputTokens: integer('input_tokens').notNull().default(0),
+    outputTokens: integer('output_tokens').notNull().default(0),
+    totalTokens: integer('total_tokens').notNull().default(0),
+    usageKnown: integer('usage_known').notNull().default(1),
+    startedAt: text('started_at'),
+    completedAt: text('completed_at'),
+    errorCode: text('error_code'),
+  },
+  (t) => [uniqueIndex('run_round_number').on(t.runId, t.roundNumber)],
+);
+export const adversaryEvents = sqliteTable(
+  'adversary_events',
+  {
+    sequence: integer('sequence').primaryKey({ autoIncrement: true }),
+    runId: text('run_id')
+      .notNull()
+      .references(() => experimentRuns.id, { onDelete: 'cascade' }),
+    roundId: text('round_id')
+      .notNull()
+      .references(() => runRounds.id, { onDelete: 'cascade' }),
+    type: text('type').notNull(),
+    content: text('content').notNull(),
+    queryIndex: integer('query_index'),
+  },
+  (t) => [index('event_run_sequence').on(t.runId, t.sequence)],
+);
+export const agentSteps = sqliteTable(
+  'agent_steps',
+  {
+    roundId: text('round_id')
+      .notNull()
+      .references(() => runRounds.id, { onDelete: 'cascade' }),
+    step: integer('step').notNull(),
+    status: text('status').notNull(),
+    usageRecorded: integer('usage_recorded').notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.roundId, t.step] })],
+);
+export const workerLease = sqliteTable('worker_lease', {
+  id: integer('id').primaryKey(),
+  owner: text('owner').notNull(),
+  expiresAt: integer('expires_at').notNull(),
+});
