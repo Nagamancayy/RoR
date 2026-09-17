@@ -39,7 +39,7 @@ The app creates one secret **32-character Base64-alphabet string from 24 OS-rand
 ## Oracle definition
 
 - Kind: `ENCRYPTION_ROR`.
-- Inputs: valid UTF-8, including empty text, NULs and line breaks; maximum **1024 decoded bytes**. Hex/Base64 are accepted when they decode to valid UTF-8. Bytes round-trip through strict UTF-8 without normalization or replacement. Invalid UTF-8/oversize inputs are rejected identically in both worlds before spending a query.
+- Inputs: valid UTF-8, including empty text, NULs and line breaks; maximum **128 decoded bytes**. Hex/Base64 are accepted when they decode to valid UTF-8. Bytes round-trip through strict UTF-8 without normalization or replacement. Invalid UTF-8/oversize inputs are rejected identically in both worlds before spending a query.
 - REAL: execute the original encryption function, then expose slices of its returned payload without modification.
 - RANDOM: independent uniform bytes for the same three fields; no encryption or plaintext padding is substituted into REAL.
 
@@ -59,10 +59,14 @@ Encryption uses `.encode()` (UTF-8), while the original decryptor uses `.decode(
 
 ## Isolation and limits
 
-Only the pinned local bridge can execute; callers cannot select scripts or file paths. Secret keys travel over stdin, never process arguments, logs, browser responses or model tools. The child receives no OpenAI credential/master-key environment. Python runs with `-I -B`, without writing bytecode caches. Calls have a 10-second hard process timeout and 32 KiB output limit; errors are sanitized. Runtime/hash health is checked in both worlds. Unavailable Python fails the affected batch without reveal, while the worker remains available for other queued algorithms. The 1 KiB input cap bounds synchronous execution inside the existing atomic query transaction. This is a local/self-hosted research integration, not a general Python sandbox or timing-side-channel experiment.
+Only the pinned local bridge can execute; callers cannot select scripts or file paths. Secret keys travel over stdin, never process arguments, logs, browser responses or model tools. The child receives no OpenAI credential/master-key environment. Python runs with `-I -B`, without writing bytecode caches. Calls have a 10-second hard process timeout and 32 KiB output limit; errors are sanitized. Runtime/hash health is checked in both worlds. Unavailable Python fails the affected batch without reveal, while the worker remains available for other queued algorithms. The 128-byte input cap bounds synchronous execution inside the existing atomic query transaction. This is a local/self-hosted research integration, not a general Python sandbox or timing-side-channel experiment.
 
 Python timing, decryption validity and private intermediate values are not added to oracle responses. The model receives the public construction description/configuration and normal query transcript only. The independent fixture report cannot distinguish a session's hidden world.
 
 ## Verification
 
-Automated coverage includes pinned source checksums; empty/ASCII/NUL/Unicode/127/128/129/1024-byte correctness fixtures through the original decryptor; field/length equivalence; invalid input/seeded rejection; API whitelisting; public export blindness; missing-runtime sanitization; manual browser lifecycle and autonomous batch lifecycle with the controlled test provider. Existing AES/HMAC regressions remain required. Live OpenAI testing is separate from these deterministic provider tests.
+Automated coverage includes pinned source checksums; empty/ASCII/NUL/Unicode/64/127/128-byte correctness fixtures through the original decryptor; field/length equivalence; invalid input/seeded rejection; API whitelisting; public export blindness; missing-runtime sanitization; manual browser lifecycle and autonomous batch lifecycle with the controlled test provider. Existing AES/HMAC regressions remain required. Live OpenAI testing is separate from these deterministic provider tests.
+
+## Input policy update — 17 September 2026
+
+All new oracle queries now accept at most 128 decoded bytes (not characters), in both worlds and every encoding. New public configurations/exports record `maxInputBytes: 128`. Historical completed transcripts, including the earlier 1024-byte study, remain unchanged; missing this configuration field in older records denotes the earlier policy. The Python sources and their padding remain unchanged: exactly 128 bytes of input still produces 256 ciphertext bytes because a full padding block is added. Independent correctness fixtures now stay within the same input cap.

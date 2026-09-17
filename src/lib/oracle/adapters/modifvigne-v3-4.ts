@@ -6,6 +6,7 @@ import { DomainError } from '../../errors';
 import { serializeByteFields, type OracleAdapter } from '../types';
 
 const configSchema = z.strictObject({
+  maxInputBytes: z.literal(128).default(128),
   sourceVersion: z.literal('original-v3.4').default('original-v3.4'),
   encryptionSha256: z
     .literal('bde33391750173f4c1b5e6825302976f62b7e09c49b2e594fa46411e43e42470')
@@ -63,8 +64,11 @@ export function invokeModifvigne(request: Record<string, string>): unknown {
   return result;
 }
 function validateInput(input: Buffer) {
-  if (input.length > 1024)
-    throw new DomainError('INPUT_TOO_LARGE', 'ModifVigne v3.4 accepts at most 1 KiB per query.');
+  if (input.length > 128)
+    throw new DomainError(
+      'INPUT_TOO_LARGE',
+      'ModifVigne v3.4 accepts at most 128 bytes per query.',
+    );
   if (!isUtf8(input))
     throw new DomainError(
       'INVALID_INPUT_ENCODING',
@@ -77,11 +81,12 @@ export const modifvigneAdapter: OracleAdapter<
 > = {
   metadata: {
     id: 'modifvigne-v3-4',
+    maxInputBytes: 128,
     displayName: 'ModifVigne v3.4 (original Python)',
     kind: 'ENCRYPTION_ROR',
     supportsReproducible: false,
     description:
-      'Original encrypt_v3_4, unchanged. UTF-8 only, maximum 1 KiB. A fixed secret 32-character Base64 key (192 random bits) per round. Each query uses the original os.urandom salt generator and random 128-byte block padding. Payload order: tag (128 bytes), salt (32 bytes), ciphertext (128 × (floor(inputBytes / 128) + 1) bytes).',
+      'Original encrypt_v3_4, unchanged. UTF-8 only, maximum 128 bytes. A fixed secret 32-character Base64 key (192 random bits) per round. Each query uses the original os.urandom salt generator and random 128-byte block padding. Payload order: tag (128 bytes), salt (32 bytes), ciphertext (128 × (floor(inputBytes / 128) + 1) bytes).',
     securityNote:
       'Research construction: custom ten-round compression initializes a 128-byte cyclic keystream from key and salt; bytes are added/subtracted modulo 256 using an odd multiplier derived from salt_prime and position. The tag hashes the padded plaintext before state adjustment. RANDOM returns independent uniform fields with identical lengths. Seeded replay is unavailable because original Python randomness is preserved. Decryption correctness is tested separately and is not an oracle signal.',
     responseFields: [

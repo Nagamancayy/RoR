@@ -41,14 +41,16 @@ export function ExperimentConsole({ id }: { id: string }) {
   const [confirmation, setConfirmation] = useState<Guess | 'ABORT' | null>(null);
   const [announcement, setAnnouncement] = useState('');
   const router = useRouter();
+  const algorithm = algorithms.data?.find((a) => a.id === resource.data?.algorithmId);
+  const maxInputBytes = algorithm?.maxInputBytes ?? 1048576;
   const decoded = useMemo(() => {
     try {
       const bytes = decodeInput(input, encoding);
       return {
         byteLength: bytes.length,
         error:
-          bytes.length > 1048576
-            ? 'Input is too large. The maximum decoded size is 1 MiB (1,048,576 bytes).'
+          bytes.length > maxInputBytes
+            ? `Input is too large. The maximum decoded size is ${maxInputBytes === 1048576 ? '1 MiB (1,048,576 bytes)' : `${maxInputBytes} bytes`}.`
             : '',
       };
     } catch (reason) {
@@ -57,7 +59,7 @@ export function ExperimentConsole({ id }: { id: string }) {
         error: reason instanceof Error ? reason.message : 'Invalid input.',
       };
     }
-  }, [input, encoding]);
+  }, [input, encoding, maxInputBytes]);
   const experiment = resource.data;
   function switchEncoding(next: InputEncoding) {
     try {
@@ -130,7 +132,6 @@ export function ExperimentConsole({ id }: { id: string }) {
   const chosenQuery =
     experiment.queries.find((record) => record.index === selected) || experiment.queries.at(-1);
   const display = displayOverride || experiment.displayConfig;
-  const algorithm = algorithms.data?.find((a) => a.id === experiment.algorithmId);
   return (
     <>
       <div className="page-heading console-heading">
@@ -179,7 +180,7 @@ export function ExperimentConsole({ id }: { id: string }) {
                   <h2>Query composer</h2>
                 </div>
                 <span className="muted" style={{ fontSize: 10 }}>
-                  Maximum 1 MiB
+                  Maximum {maxInputBytes === 1048576 ? '1 MiB' : `${maxInputBytes} bytes`}
                 </span>
               </div>
               <form className="panel-body" onSubmit={query}>

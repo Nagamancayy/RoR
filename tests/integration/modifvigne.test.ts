@@ -44,7 +44,7 @@ describe('unchanged ModifVigne v3.4 research integration', () => {
       /ResearchFixtureKey|payloadHex|pesanakhir|secretState/,
     );
   }, 30000);
-  it.each([0, 1, 127, 128, 129, 1024])(
+  it.each([0, 1, 127, 128])(
     'matches REAL/RANDOM shape for %i bytes without repadding payload',
     (length) => {
       const input = args(Buffer.alloc(length, 65));
@@ -72,8 +72,17 @@ describe('unchanged ModifVigne v3.4 research integration', () => {
         const created = service.create({ ...request, queryLimit: 2 });
         expect(() => service.query(created.id, { encoding: 'hex', data: 'ff' })).toThrow(/UTF-8/);
         expect(() =>
-          service.query(created.id, { encoding: 'utf8', data: 'x'.repeat(1025) }),
-        ).toThrow(/1 KiB/);
+          service.query(created.id, { encoding: 'utf8', data: 'x'.repeat(129) }),
+        ).toThrow(/128 bytes/);
+        for (const encoding of ['hex', 'base64'] as const) {
+          expect(() =>
+            service.query(created.id, { encoding, data: Buffer.alloc(129, 65).toString(encoding) }),
+          ).toThrow(/128 bytes/);
+        }
+        expect(() => service.query(created.id, { encoding: 'utf8', data: 'é'.repeat(65) })).toThrow(
+          /128 bytes/,
+        );
+        expect(created.algorithmConfig.maxInputBytes).toBe(128);
         expect(service.get(created.id).queryCount).toBe(0);
         service.query(created.id, { encoding: 'utf8', data: 'café' });
         const active = service.query(created.id, { encoding: 'hex', data: '636166c3a9' });
@@ -84,6 +93,34 @@ describe('unchanged ModifVigne v3.4 research integration', () => {
         expect(() => service.query(created.id, { encoding: 'utf8', data: '' })).toThrow();
         service.delete(created.id);
         expect(service.list()).toHaveLength(0);
+      } finally {
+        db.sqlite.close();
+      }
+    },
+  );
+  it.each(['REAL', 'RANDOM'] as const)(
+    'accepts exactly 128 decoded bytes in every encoding in %s',
+    (world) => {
+      const db = openDatabase(':memory:');
+      try {
+        const service = new ExperimentService(db, {
+          masterKey: Buffer.alloc(32, 8),
+          worldSampler: () => world,
+        });
+        const session = service.create({ ...request, queryLimit: 3 });
+        const samples = [
+          { encoding: 'utf8', data: 'é'.repeat(64) },
+          { encoding: 'hex', data: Buffer.alloc(128, 65).toString('hex') },
+          { encoding: 'base64', data: Buffer.alloc(128, 65).toString('base64') },
+        ];
+        for (const sample of samples) {
+          const result = service.query(session.id, sample);
+          expect(result.queries.at(-1)?.inputByteLength).toBe(128);
+          expect(
+            result.queries.at(-1)?.response.fields.find((field) => field.name === 'ciphertext')
+              ?.byteLength,
+          ).toBe(256);
+        }
       } finally {
         db.sqlite.close();
       }

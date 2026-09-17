@@ -1,3 +1,19 @@
+# ModifVigne 128-byte input policy verification
+
+Verified on 2026-09-17. The integration now limits decoded input to 128 bytes in both worlds and all supported encodings. Original Python sources and pinned snapshots remain byte-for-byte unchanged. Original padding still makes a 128-byte input produce a 256-byte ciphertext.
+
+- Formatter, lint, strict typecheck, production build and production smoke passed.
+- 150 unit/integration tests across 10 files passed.
+- All 13 Playwright scenarios passed; the updated ModifVigne boundary scenario also passed separately.
+- Tests cover acceptance of exactly 128 decoded bytes, rejection above the limit without spending query budget, and UTF-8/hex/Base64 equivalence.
+- All 8 original Python correctness fixtures passed byte recovery and tag checks; original Unicode display behavior is preserved. See [128-byte correctness report](modifvigne-v3-4-128-correctness.json).
+
+A separate local blind study used a fixed public ciphertext parity rule chosen by the conversation assistant, with guesses saved before any reveal. Twenty independent one-query sessions scored 13/20 (65%; two-sided binomial p=0.2632), while twenty independent 20-query sessions scored 20/20 (100%; p=0.0000019073). These groups have different query budgets and must not be pooled. The one-query sample does not establish success above chance. No external OpenAI API evaluation was performed.
+
+The rule exploits the original 128-byte keystream period and full-block padding for exactly 128-byte inputs. The cap reduces observations per query but does not remove this distinguishing signal. These results are empirical evidence for this specific adversary and configuration, not a general security proof. Local transcripts, committed guesses, protocol and report are under `data/research/modifvigne-128-model-2026-09-17/` and are excluded from Git.
+
+---
+
 # ModifVigne v3.4 integration verification
 
 Verified on 2026-09-16. The two original files and their vendored snapshots were compared byte-for-byte and matched the pinned SHA-256 hashes. Neither original source file was changed.

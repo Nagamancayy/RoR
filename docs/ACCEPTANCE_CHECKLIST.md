@@ -31,7 +31,7 @@ See [v2 design](AUTONOMOUS_ADVERSARY.md) and [verification evidence](VERIFICATIO
 - [x] Exact requested encryption/decryption sources preserved with SHA-256 identity checks.
 - [x] Original Python encryption flow and OS randomness run without modification.
 - [x] Independent checks execute the complete original decryptor and report bytes/tag/text separately.
-- [x] UTF-8 and 1 KiB restrictions, exact key distribution and unsupported seeded replay documented.
+- [x] UTF-8 and 128-byte restrictions, exact key distribution and unsupported seeded replay documented.
 - [x] REAL/RANDOM public shape equivalence and secret visibility covered.
 - [x] Missing Python fails only its batch and the worker can continue another algorithm.
 - [x] Manual and autonomous browser flows, exports, regressions and production smoke pass.

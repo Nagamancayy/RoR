@@ -54,7 +54,7 @@ def main(request):
     if request['operation'] == 'health':
         return {'ready': True}
     message_bytes = base64.b64decode(request['inputBase64'], validate=True)
-    if len(message_bytes) > 1024:
+    if len(message_bytes) > 128:
         raise ValueError('input limit')
     message = message_bytes.decode('utf-8')
     key = request['key']
