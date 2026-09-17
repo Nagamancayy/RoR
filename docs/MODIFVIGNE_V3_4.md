@@ -39,7 +39,7 @@ The app creates one secret **32-character Base64-alphabet string from 24 OS-rand
 ## Oracle definition
 
 - Kind: `ENCRYPTION_ROR`.
-- Inputs: valid UTF-8, including empty text, NULs and line breaks; maximum **128 decoded bytes**. Hex/Base64 are accepted when they decode to valid UTF-8. Bytes round-trip through strict UTF-8 without normalization or replacement. Invalid UTF-8/oversize inputs are rejected identically in both worlds before spending a query.
+- Inputs: valid UTF-8, including empty text, NULs and line breaks; maximum **127 decoded bytes**. Hex/Base64 are accepted when they decode to valid UTF-8. Bytes round-trip through strict UTF-8 without normalization or replacement. Invalid UTF-8/oversize inputs are rejected identically in both worlds before spending a query.
 - REAL: execute the original encryption function, then expose slices of its returned payload without modification.
 - RANDOM: independent uniform bytes for the same three fields; no encryption or plaintext padding is substituted into REAL.
 
@@ -49,7 +49,7 @@ The app creates one secret **32-character Base64-alphabet string from 24 OS-rand
 | `salt` | 32 bytes |
 | `ciphertext` | `128 * (floor(inputBytes / 128) + 1)` bytes |
 
-Concatenating these three field values reconstructs the original payload exactly. Aligned and empty inputs still get the original full padding block. An empty query therefore returns 288 bytes; a 128-byte query returns 416 bytes. The browser's hex/Base64 encoding is presentation only.
+Concatenating these three field values reconstructs the original payload exactly. Aligned and empty inputs still get the original full padding block. Every accepted query (0–127 input bytes) returns 288 bytes. A historical 128-byte query returned 416 bytes; new queries of that length are rejected. The browser's hex/Base64 encoding is presentation only.
 
 Seeded mode is disabled for this adapter and rejected by the server, preserving original Python randomness. Built-in AES/HMAC seeded experiments are unaffected. Each fresh process also isolates the source's global `IV` between queries, and the function's own reset runs unchanged.
 
@@ -59,14 +59,18 @@ Encryption uses `.encode()` (UTF-8), while the original decryptor uses `.decode(
 
 ## Isolation and limits
 
-Only the pinned local bridge can execute; callers cannot select scripts or file paths. Secret keys travel over stdin, never process arguments, logs, browser responses or model tools. The child receives no OpenAI credential/master-key environment. Python runs with `-I -B`, without writing bytecode caches. Calls have a 10-second hard process timeout and 32 KiB output limit; errors are sanitized. Runtime/hash health is checked in both worlds. Unavailable Python fails the affected batch without reveal, while the worker remains available for other queued algorithms. The 128-byte input cap bounds synchronous execution inside the existing atomic query transaction. This is a local/self-hosted research integration, not a general Python sandbox or timing-side-channel experiment.
+Only the pinned local bridge can execute; callers cannot select scripts or file paths. Secret keys travel over stdin, never process arguments, logs, browser responses or model tools. The child receives no OpenAI credential/master-key environment. Python runs with `-I -B`, without writing bytecode caches. Calls have a 10-second hard process timeout and 32 KiB output limit; errors are sanitized. Runtime/hash health is checked in both worlds. Unavailable Python fails the affected batch without reveal, while the worker remains available for other queued algorithms. The 127-byte input cap bounds synchronous execution inside the existing atomic query transaction. This is a local/self-hosted research integration, not a general Python sandbox or timing-side-channel experiment.
 
 Python timing, decryption validity and private intermediate values are not added to oracle responses. The model receives the public construction description/configuration and normal query transcript only. The independent fixture report cannot distinguish a session's hidden world.
 
 ## Verification
 
-Automated coverage includes pinned source checksums; empty/ASCII/NUL/Unicode/64/127/128-byte correctness fixtures through the original decryptor; field/length equivalence; invalid input/seeded rejection; API whitelisting; public export blindness; missing-runtime sanitization; manual browser lifecycle and autonomous batch lifecycle with the controlled test provider. Existing AES/HMAC regressions remain required. Live OpenAI testing is separate from these deterministic provider tests.
+Automated coverage includes pinned source checksums; empty/ASCII/NUL/Unicode/64/126/127-byte correctness fixtures through the original decryptor; field/length equivalence; invalid input/seeded rejection; API whitelisting; public export blindness; missing-runtime sanitization; manual browser lifecycle and autonomous batch lifecycle with the controlled test provider. Existing AES/HMAC regressions remain required. Live OpenAI testing is separate from these deterministic provider tests.
 
 ## Input policy update — 17 September 2026
 
-All new oracle queries now accept at most 128 decoded bytes (not characters), in both worlds and every encoding. New public configurations/exports record `maxInputBytes: 128`. Historical completed transcripts, including the earlier 1024-byte study, remain unchanged; missing this configuration field in older records denotes the earlier policy. The Python sources and their padding remain unchanged: exactly 128 bytes of input still produces 256 ciphertext bytes because a full padding block is added. Independent correctness fixtures now stay within the same input cap.
+At the first policy update, new oracle queries accepted at most 128 decoded bytes (not characters), in both worlds and every encoding. New public configurations/exports record `maxInputBytes: 128`. Historical completed transcripts, including the earlier 1024-byte study, remain unchanged; missing this configuration field in older records denotes the earlier policy. The Python sources and their padding remain unchanged: exactly 128 bytes of input still produces 256 ciphertext bytes because a full padding block is added. Independent correctness fixtures now stay within the same input cap.
+
+## Follow-up input policy — 127-byte maximum
+
+The current maximum is **127 decoded payload bytes**, including for existing active sessions. New configurations record `maxInputBytes: 127`; previous completed 128-byte/1024-byte transcripts remain intact. Exactly 127 bytes receives one original padding byte, yielding 128 ciphertext bytes. The caller supplies the payload; the Challenger creates and holds the secret key. Salt is generated internally by the unchanged original function, never supplied or overridden by the caller. All fixture inputs now fit the 127-byte cap.

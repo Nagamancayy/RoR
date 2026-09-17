@@ -11,9 +11,9 @@ export function checkModifvigne() {
     ['NUL and line breaks', '\0first\nsecond\r\n'],
     ['Unicode', 'Halo dunia — café 🔬'],
     ['127 bytes', 'a'.repeat(127)],
-    ['128 bytes', 'b'.repeat(128)],
+    ['126 bytes', 'b'.repeat(126)],
     ['64 bytes', 'c'.repeat(64)],
-    ['128 UTF-8 bytes', 'é'.repeat(64)],
+    ['127 UTF-8 bytes', 'é'.repeat(63) + 'a'],
   ].map(([label, text]) => ({
     label,
     ...resultSchema.parse(
@@ -26,7 +26,7 @@ export function checkModifvigne() {
   }));
   return modifvigneCheckSchema.parse({
     checkedAt: new Date().toISOString(),
-    maxInputBytes: 128,
+    maxInputBytes: 127,
     sourceVersion: 'original-v3.4',
     encryptionSha256: modifvigneAdapter.configSchema.parse({}).encryptionSha256,
     decryptionSha256: modifvigneAdapter.configSchema.parse({}).decryptionSha256,

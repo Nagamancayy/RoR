@@ -1,3 +1,21 @@
+# ModifVigne 127-byte maximum verification
+
+Verified on 2026-09-17 after the follow-up input cap change. Both worlds now reject payloads above 127 decoded bytes before consuming query budget. Exactly 127 bytes produces 128 ciphertext bytes using the original one-byte padding. Keys remain Challenger-owned; salt is generated only inside the unchanged original Python function.
+
+- Formatter, lint, strict typecheck, production build and production smoke passed.
+- All 150 unit/integration tests and all 13 Playwright scenarios passed.
+- Boundary coverage accepts 127 bytes and rejects 128 bytes through UTF-8/hex/Base64, including multibyte text.
+- All 8 independent original encrypt/decrypt fixtures passed byte recovery and tag checks. See [127-byte correctness report](modifvigne-v3-4-127-correctness.json). Original Unicode display behavior remains unchanged.
+- Original source and vendored-copy SHA-256 identities were rechecked and remain pinned.
+
+A fresh blind study after enforcing this cap used 20 independent sessions, one 127-byte query each. A fixed offline distinguisher selected by the conversation assistant scored 20/20: 11 REAL and 9 RANDOM. Wilson 95% is 83.89–100%; exact two-sided binomial p=0.00000190735. No external OpenAI model call was made.
+
+This distinguisher enumerates 2^24 possible low bits of the internally derived salt_prime, reconstructs candidate states from known plaintext/ciphertext using odd-multiplier inverses, then compares the public tag against the original public hash computation. It does not supply salt, access Challenger secrets, use the decryptor, or alter original source. All guesses were saved before any reveal. Its higher offline computation makes it a different adversary from the earlier parity test, despite the one-query budget. This is empirical evidence for the stated configuration, not master-key recovery or a general security proof.
+
+The full local report, fixed protocol, attacker code, audit, guesses and transcripts are in `data/research/modifvigne-127-cap-model-2026-09-17/`. Earlier studies and completed sessions remain intact and are not pooled with this group.
+
+---
+
 # ModifVigne 128-byte input policy verification
 
 Verified on 2026-09-17. The integration now limits decoded input to 128 bytes in both worlds and all supported encodings. Original Python sources and pinned snapshots remain byte-for-byte unchanged. Original padding still makes a 128-byte input produce a 256-byte ciphertext.

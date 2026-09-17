@@ -173,15 +173,15 @@ test('original ModifVigne check and manual oracle work with preserved source sem
   await expect(page.getByLabel('Oracle input')).toBeVisible();
   const id = page.url().split('/').at(-1)!;
   const rejected = await request.post(`/api/experiments/${id}/query`, {
-    data: { encoding: 'utf8', data: 'a'.repeat(129) },
+    data: { encoding: 'utf8', data: 'a'.repeat(128) },
   });
   expect(rejected.status()).toBe(413);
   expect((await (await request.get(`/api/experiments/${id}`)).json()).queryCount).toBe(0);
-  await expect(page.getByText('Maximum 128 bytes', { exact: true })).toBeVisible();
-  await page.getByLabel('Oracle input').fill('é'.repeat(65));
+  await expect(page.getByText('Maximum 127 bytes', { exact: true })).toBeVisible();
+  await page.getByLabel('Oracle input').fill('é'.repeat(64));
   await expect(page.getByRole('button', { name: 'Query Oracle', exact: true })).toBeDisabled();
-  await expect(page.locator('#query-input-error')).toContainText('128 bytes');
-  await query(page, 'A'.repeat(128), 1);
+  await expect(page.locator('#query-input-error')).toContainText('127 bytes');
+  await query(page, 'A'.repeat(127), 1);
   await expect(page.getByTestId('response-field-salt')).toBeVisible();
   await expect(page.getByTestId('response-field-tag')).toBeVisible();
   await page.getByRole('button', { name: 'Guess REAL', exact: true }).click();

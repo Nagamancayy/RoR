@@ -181,6 +181,6 @@ Optional batch automation, comparative workspaces, additional randomness tests, 
 
 ## Original ModifVigne v3.4 research algorithm
 
-Select **ModifVigne v3.4 (original Python)** in the experiment form. The app runs unchanged copies of your original encryption/decryption sources, verified by SHA-256. Requires Python 3 (`ROR_PYTHON` can select its executable). Inputs are valid UTF-8, up to 128 bytes; seeded replay is unavailable for this adapter to preserve its original randomness.
+Select **ModifVigne v3.4 (original Python)** in the experiment form. The app runs unchanged copies of your original encryption/decryption sources, verified by SHA-256. Requires Python 3 (`ROR_PYTHON` can select its executable). Inputs are valid UTF-8, up to 127 bytes; seeded replay is unavailable for this adapter to preserve its original randomness.
 
 Use **Check encryption / decryption** before starting, or run `pnpm test:modifvigne`. The check reports byte recovery, tag verification and original text display separately, including the preserved UTF-8/Latin-1 difference. See [exact source identity, oracle/key distribution and limitations](docs/MODIFVIGNE_V3_4.md).

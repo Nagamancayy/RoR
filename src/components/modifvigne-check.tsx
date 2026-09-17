@@ -32,7 +32,7 @@ export default function ModifvigneCheckPanel() {
       <h3>Original Python · v3.4</h3>
       <p className="field-hint">
         Both source files are preserved byte for byte and verified before execution. UTF-8 input
-        only, up to 128 bytes. Each round uses a hidden 32-character Base64 key (192 random bits).
+        only, up to 127 bytes. Each round uses a hidden 32-character Base64 key (192 random bits).
         Salt and padding use the original Python randomness.
       </p>
       <button type="button" className="button secondary" disabled={busy} onClick={check}>
